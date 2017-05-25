@@ -2,7 +2,6 @@ version: '{build}-{branch}'
 
 platform:
     - x64
-    - x86
 
 image:
 - Visual Studio 2015
@@ -32,20 +31,17 @@ configuration:
 
 before_build:
 - cmd: >-
-    IF %PLATFORM% == x86 set GENERATOR_PLATFORM=Win32
-    
-    IF %PLATFORM% == x64 set GENERATOR_PLATFORM=Win64
-- cmd: >-
     mkdir build
 
     mkdir dist
 
     cd build
 
-    cmake -G"Visual Studio %VS_VER% %GENERATOR_PLATFORM%" -DCMAKE_INSTALL_PREFIX=.\dist -D WITH_SIMD=%SIMD% -D NASM=yasm ..\
+    cmake -G"Visual Studio %VS_VER% Win64" -DCMAKE_INSTALL_PREFIX=.\dist -D WITH_SIMD=%SIMD% -D NASM=yasm ..\
 
 after_build:
     - cmd: cmake --build .\ --target INSTALL
+    - cmd: 7z a mozjpeg.zip %APPVEYOR_BUILD_FOLDER%\build\dist
 
 install:
     - cinst yasm
@@ -57,5 +53,9 @@ build:
 
 test_script:
   - ctest -T Test -j%NUMBER_OF_PROCESSORS%
+
+artifacts:
+  - path: mozjpeg.zip
+    name: mozjpeg
 
 deploy: off
