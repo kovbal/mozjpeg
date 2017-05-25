@@ -33,6 +33,7 @@ configuration:
 before_build:
 - cmd: >-
     IF %PLATFORM% == x86 set GENERATOR_PLATFORM=Win32
+    
     IF %PLATFORM% == x64 set GENERATOR_PLATFORM=Win64
 - cmd: >-
     mkdir build
