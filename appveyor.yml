@@ -1,6 +1,8 @@
-version: {build}-{branch}
+version: "{build}-{branch}"
 
-platform: x64
+platform:
+    - x64
+    - x86
 
 image:
 - Visual Studio 2015
@@ -12,9 +14,11 @@ environment:
     - SIMD: no
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       VS_VER: "12 2013"
-      VS_VER: "14 2015"
+          #- "14 2015"
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      VS_VER: "15 2017"
+      VS_VER: 15 2017
+
+
 
 before_build:
     - cmd: mkdir build
