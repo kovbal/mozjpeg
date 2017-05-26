@@ -4,30 +4,40 @@ platform:
     - x64
 
 image:
-- Visual Studio 2015
 - Visual Studio 2017
+- Visual Studio 2015
+
+cache:
+  - C:\ProgramData\chocolatey\bin -> appveyor.yml
+  - C:\ProgramData\chocolatey\lib -> appveyor.yml
 
 environment:
   matrix:
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-      VS_VER: "12 2013"
-      SIMD: yes
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-      VS_VER: "12 2013"
-      SIMD: no
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-      VS_VER: "14 2015"
-      SIMD: yes
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-      VS_VER: "14 2015"
-      SIMD: no
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      VS_VER: 15 2017
+      VS_VER: "15 2017"
+      SIMD: yes
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      VS_VER: "15 2017"
+      SIMD: no
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      VS_VER: "14 2015"
+      SIMD: yes
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      VS_VER: "14 2015"
+      SIMD: no
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      VS_VER: "12 2013"
+      SIMD: yes
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      VS_VER: "12 2013"
+      SIMD: no
 
 configuration:
-    - Debug
     - Release
+    - Debug
 
+install:
+    - cinst yasm
 
 before_build:
 - cmd: >-
@@ -43,16 +53,19 @@ after_build:
     - cmd: cmake --build .\ --target INSTALL
     - cmd: 7z a mozjpeg.zip %APPVEYOR_BUILD_FOLDER%\build\dist
 
-install:
-    - cinst yasm
-
 build:
   project: build\mozjpeg.sln
   parallel: true
   verbosity: minimal
 
 test_script:
-  - ctest -T Test -j%NUMBER_OF_PROCESSORS%
+  - ctest -T Test -j%NUMBER_OF_PROCESSORS% || echo Tests failed
+
+after_test:
+    - ps: >-
+        $wc = New-Object 'System.Net.WebClient'
+
+        foreach($file in $(ls Testing\*\Test.xml)) { $wc.UploadFile("https://ci.appveyor.com/api/testresults/xunit/$($env:APPVEYOR_JOB_ID)", $file.FullName) }
 
 artifacts:
   - path: mozjpeg.zip
