@@ -37,7 +37,16 @@ configuration:
     - Debug
 
 install:
-    - cinst yasm
+- ps: >-
+    & cinst yasm
+
+    Invoke-WebRequest -Uri https://github.com/kovbal/appveyor-ctest-uploader/archive/v1.0.0.zip -OutFile ctest-uploader.zip
+
+    Expand-Archive -Path .\ctest-uploader.zip -DestinationPath .\
+
+    mv .\appveyor-ctest-uploader-* appveyor-ctest-uploader
+
+    . .\appveyor-ctest-uploader\upload-ctest-report.ps1
 
 before_build:
 - cmd: >-
@@ -63,9 +72,13 @@ test_script:
 
 after_test:
     - ps: >-
-        $wc = New-Object 'System.Net.WebClient'
+            foreach($f in $(ls Testing\*\Test.xml))
 
-        foreach($file in $(ls Testing\*\Test.xml)) { $wc.UploadFile("https://ci.appveyor.com/api/testresults/xunit/$($env:APPVEYOR_JOB_ID)", $file.FullName) }
+            {
+
+                upload-ctest-report $f
+
+            }
 
 artifacts:
   - path: mozjpeg.zip
