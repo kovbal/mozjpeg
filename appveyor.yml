@@ -68,17 +68,12 @@ build:
   verbosity: minimal
 
 test_script:
-  - ctest -T Test -j%NUMBER_OF_PROCESSORS% || echo Tests failed
+  - ps: >-
+      ctest -T Test
 
-after_test:
-    - ps: >-
-            foreach($f in $(ls Testing\*\Test.xml))
+      foreach($f in $(ls Testing\*\Test.xml))
 
-            {
-
-                upload-ctest-report $f
-
-            }
+      { upload-ctest-report $f }
 
 artifacts:
   - path: mozjpeg.zip
