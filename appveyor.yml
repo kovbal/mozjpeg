@@ -68,9 +68,10 @@ build:
   verbosity: minimal
 
 test_script:
-  - ps: >-
-      ctest -T Test
+  - ctest -T Test -j%NUMBER_OF_PROCESSORS% || echo Tests failed
 
+after_test:
+  - ps: >-
       foreach($f in $(ls Testing\*\Test.xml))
 
       { upload-ctest-report $f }
